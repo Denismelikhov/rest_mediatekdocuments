@@ -86,5 +86,14 @@ class Controle{
     public function unauthorized(){
         $this->reponse(401, "authentification incorrecte");
     }
+
+    /**
+     * requête invalide
+     * demande d'afficher un message d'erreur
+     * @param string $message
+     */
+    public function badRequest(string $message){
+        $this->reponse(400, $message);
+    }
     
 }

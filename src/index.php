@@ -29,6 +29,8 @@ if (!$url->authentification()){
     // retour de l'utilisateur connecté
     if ($methodeHTTP === "GET" && $table === "utilisateurconnecte"){
         $controle->reponseUtilisateurConnecte($url->getUtilisateurConnecte());
+    }else if ($table == ""){
+        $controle->badRequest("aucune ressource demandée");
     }else{
         // demande au controleur de traiter la demande
         $controle->demande($methodeHTTP, $table, $id, $champs);
