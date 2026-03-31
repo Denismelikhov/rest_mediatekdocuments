@@ -42,10 +42,15 @@ class MyAccessBDD extends AccessBDD {
                 return $this->selectExemplairesRevue($champs);
             case "commandedocument" :
                 return $this->selectCommandesDocument($champs);
+            case "commanderevue" :
+                return $this->selectCommandesRevue($champs);
+            case "commanderevueexpiration" :
+                return $this->selectCommandesRevueAExpirationProche();
             case "genre" :
             case "public" :
             case "rayon" :
             case "etat" :
+            case "suivi" :
                 // select portant sur une table contenant juste id et libelle
                 return $this->selectTableSimple($table);
             case "" :
@@ -71,8 +76,11 @@ class MyAccessBDD extends AccessBDD {
                 return $this->insertDvd($champs);
             case "revue" :
                 return $this->insertRevue($champs);
-            case "" :
-            default:                    
+            case "commandedocument" :
+                return $this->insertCommandeDocument($champs);
+            case "commanderevue" :
+                return $this->insertCommandeRevue($champs);
+            default:
                 return $this->insertOneTupleOneTable($table, $champs);  
         }
     }
@@ -93,7 +101,10 @@ class MyAccessBDD extends AccessBDD {
                 return $this->updateDvd($id, $champs);
             case "revue" :
                 return $this->updateRevue($id, $champs);
-            case "" :
+            case "commandedocument" :
+                return $this->updateCommandeDocument($id, $champs);
+            case "commanderevue" :
+                return $this->updateCommandeRevue($id, $champs);
             default:                    
                 return $this->updateOneTupleOneTable($table, $id, $champs);
         }   
@@ -114,8 +125,10 @@ class MyAccessBDD extends AccessBDD {
                 return $this->deleteDvd($champs);
             case "revue" :
                 return $this->deleteRevue($champs);
-            case "" :
-                // return $this->uneFonction(parametres);
+            case "commandedocument" :
+                return $this->deleteCommandeDocument($champs);
+            case "commanderevue" :
+                return $this->deleteCommandeRevue($champs);
             default:
                 // cas général
                 return $this->deleteTuplesOneTable($table, $champs);
@@ -232,10 +245,11 @@ class MyAccessBDD extends AccessBDD {
             'id' => $champs['id']
         );
 
-        $requete = "select c.id, c.dateCommande, c.montant, ";
+        $requete = "select c.id, c.dateCommande, c.montant, c.idSuivi, s.libelle as libelleSuivi, ";
         $requete .= "cd.nbExemplaire, cd.idLivreDvd ";
         $requete .= "from commandedocument cd ";
         $requete .= "join commande c on c.id = cd.id ";
+        $requete .= "join suivi s on s.id = c.idSuivi ";
         $requete .= "where cd.idLivreDvd = :id ";
         $requete .= "order by c.dateCommande desc";
 
@@ -623,5 +637,289 @@ class MyAccessBDD extends AccessBDD {
         }
 
         return $nb1 + $nb2;
+    }
+
+    private function insertCommandeDocument(?array $champs) : ?int{
+        if (
+            empty($champs) ||
+            !array_key_exists('id', $champs) ||
+            !array_key_exists('dateCommande', $champs) ||
+            !array_key_exists('montant', $champs) ||
+            !array_key_exists('nbExemplaire', $champs) ||
+            !array_key_exists('idLivreDvd', $champs)
+        ) {
+            return null;
+        }
+
+        $commande = array(
+            "id" => $champs["id"],
+            "dateCommande" => $champs["dateCommande"],
+            "montant" => $champs["montant"],
+            "idSuivi" => "00001"
+        );
+
+        $commandeDocument = array(
+            "id" => $champs["id"],
+            "nbExemplaire" => $champs["nbExemplaire"],
+            "idLivreDvd" => $champs["idLivreDvd"]
+        );
+
+        $nb1 = $this->insertOneTupleOneTable("commande", $commande);
+        if ($nb1 === null) {
+            return null;
+        }
+
+        $nb2 = $this->insertOneTupleOneTable("commandedocument", $commandeDocument);
+        if ($nb2 === null) {
+            return null;
+        }
+
+        return $nb1 + $nb2;
+    }
+
+    private function updateCommandeDocument(?string $id, ?array $champs) : ?int{
+        if (is_null($id) || empty($champs)) {
+            return null;
+        }
+
+        $ancienneCommande = $this->conn->queryBDD(
+            "select c.idSuivi, cd.nbExemplaire, cd.idLivreDvd, c.dateCommande
+             from commande c
+             join commandedocument cd on cd.id = c.id
+             where c.id = :id",
+            array("id" => $id)
+        );
+
+        if (empty($ancienneCommande)) {
+            return null;
+        }
+
+        $ancienne = $ancienneCommande[0];
+
+        $commande = array(
+            "dateCommande" => $champs["dateCommande"],
+            "montant" => $champs["montant"],
+            "idSuivi" => $champs["idSuivi"]
+        );
+
+        $commandeDocument = array(
+            "nbExemplaire" => $champs["nbExemplaire"],
+            "idLivreDvd" => $champs["idLivreDvd"]
+        );
+
+        $nb1 = $this->updateOneTupleOneTable("commande", $id, $commande);
+        if ($nb1 === null) {
+            return null;
+        }
+
+        $nb2 = $this->updateOneTupleOneTable("commandedocument", $id, $commandeDocument);
+        if ($nb2 === null) {
+            return null;
+        }
+
+        $nb3 = 0;
+        if ($ancienne["idSuivi"] !== "00003" && $champs["idSuivi"] === "00003") {
+            $nb3 = $this->creerExemplairesDepuisCommande(
+                $champs["idLivreDvd"],
+                intval($champs["nbExemplaire"]),
+                $champs["dateCommande"]
+            );
+            if ($nb3 === null) {
+                return null;
+            }
+        }
+
+        return $nb1 + $nb2 + $nb3;
+    }
+
+    private function creerExemplairesDepuisCommande(string $idDocument, int $nbExemplaires, string $dateCommande) : ?int{
+        $result = $this->conn->queryBDD(
+            "select max(numero) as maxNumero from exemplaire where id = :id",
+            array("id" => $idDocument)
+        );
+
+        $maxNumero = 0;
+        if (!empty($result) && !is_null($result[0]["maxNumero"])) {
+            $maxNumero = intval($result[0]["maxNumero"]);
+        }
+
+        $nbAjouts = 0;
+        for ($i = 1; $i <= $nbExemplaires; $i++) {
+            $exemplaire = array(
+                "id" => $idDocument,
+                "numero" => $maxNumero + $i,
+                "dateAchat" => $dateCommande,
+                "photo" => "",
+                "idEtat" => "00001"
+            );
+
+            $nb = $this->insertOneTupleOneTable("exemplaire", $exemplaire);
+            if ($nb === null) {
+                return null;
+            }
+            $nbAjouts += $nb;
+        }
+
+        return $nbAjouts;
+    }
+
+    private function deleteCommandeDocument(?array $champs) : ?int{
+        if (empty($champs) || !array_key_exists('id', $champs)) {
+            return null;
+        }
+
+        $parametres = array(
+            "id" => $champs["id"]
+        );
+
+        $result = $this->conn->queryBDD(
+            "select idSuivi from commande where id = :id",
+            $parametres
+        );
+
+        if (empty($result)) {
+            return null;
+        }
+
+        if ($result[0]["idSuivi"] === "00003" || $result[0]["idSuivi"] === "00004") {
+            return null;
+        }
+
+        $nb1 = $this->conn->updateBDD("delete from commandedocument where id = :id", $parametres);
+        if ($nb1 === null) {
+            return null;
+        }
+
+        $nb2 = $this->conn->updateBDD("delete from commande where id = :id", $parametres);
+        if ($nb2 === null) {
+            return null;
+        }
+
+        return $nb1 + $nb2;
+    }
+
+    private function selectCommandesRevue(?array $champs) : ?array{
+        if (empty($champs) || !array_key_exists('id', $champs)) {
+            return null;
+        }
+
+        $parametres = array("id" => $champs["id"]);
+
+        $requete = "select c.id, c.dateCommande, c.montant, cr.dateFinAbonnement, cr.idRevue ";
+        $requete .= "from abonnement cr ";
+        $requete .= "join commande c on c.id = cr.id ";
+        $requete .= "where cr.idRevue = :id ";
+        $requete .= "order by c.dateCommande desc";
+
+        return $this->conn->queryBDD($requete, $parametres);
+    }
+
+    private function insertCommandeRevue(?array $champs) : ?int{
+        if (
+            empty($champs) ||
+            !array_key_exists('id', $champs) ||
+            !array_key_exists('dateCommande', $champs) ||
+            !array_key_exists('montant', $champs) ||
+            !array_key_exists('dateFinAbonnement', $champs) ||
+            !array_key_exists('idRevue', $champs)
+        ) {
+            return null;
+        }
+
+        $commande = array(
+            "id" => $champs["id"],
+            "dateCommande" => $champs["dateCommande"],
+            "montant" => $champs["montant"],
+            "idSuivi" => "00001"
+        );
+
+        $commandeRevue = array(
+            "id" => $champs["id"],
+            "dateFinAbonnement" => $champs["dateFinAbonnement"],
+            "idRevue" => $champs["idRevue"]
+        );
+
+        $nb1 = $this->insertOneTupleOneTable("commande", $commande);
+        if ($nb1 === null) {
+            return null;
+        }
+
+        $nb2 = $this->insertOneTupleOneTable("abonnement", $commandeRevue);
+        if ($nb2 === null) {
+            return null;
+        }
+
+        return $nb1 + $nb2;
+    }
+
+    private function deleteCommandeRevue(?array $champs) : ?int{
+        if (empty($champs) || !array_key_exists('id', $champs)) {
+            return null;
+        }
+
+        $parametres = array("id" => $champs["id"]);
+
+        $result = $this->conn->queryBDD(
+            "select count(*) as nb
+            from exemplaire
+            where idCommande = :id",
+            $parametres
+        );
+
+        if (!empty($result) && intval($result[0]["nb"]) > 0) {
+            return null;
+        }
+
+        $nb1 = $this->conn->updateBDD("delete from commanderevue where id = :id", $parametres);
+        if ($nb1 === null) {
+            return null;
+        }
+
+        $nb1 = $this->conn->updateBDD("delete from abonnement where id = :id", $parametres);
+        if ($nb2 === null) {
+            return null;
+        }
+
+        return $nb1 + $nb2;
+    }
+
+    private function updateCommandeRevue(?string $id, ?array $champs) : ?int{
+        if (is_null($id) || empty($champs)) {
+            return null;
+        }
+
+        $commande = array(
+            "dateCommande" => $champs["dateCommande"],
+            "montant" => $champs["montant"]
+        );
+
+        $commandeRevue = array(
+            "dateFinAbonnement" => $champs["dateFinAbonnement"],
+            "idRevue" => $champs["idRevue"]
+        );
+
+        $nb1 = $this->updateOneTupleOneTable("commande", $id, $commande);
+        if ($nb1 === null) {
+            return null;
+        }
+
+        $nb2 = $this->updateOneTupleOneTable("abonnement", $id, $commandeRevue);
+        if ($nb2 === null) {
+            return null;
+        }
+
+        return $nb1 + $nb2;
+    }
+
+    private function selectCommandesRevueAExpirationProche() : ?array{
+        $requete = "select r.id, d.titre, c.id as idCommande, cr.dateFinAbonnement ";
+        $requete .= "from abonnement cr ";
+        $requete .= "join commande c on c.id = cr.id ";
+        $requete .= "join revue r on r.id = cr.idRevue ";
+        $requete .= "join document d on d.id = r.id ";
+        $requete .= "where cr.dateFinAbonnement between curdate() and date_add(curdate(), interval 30 day) ";
+        $requete .= "order by cr.dateFinAbonnement asc";
+
+        return $this->conn->queryBDD($requete);
     }
 }
