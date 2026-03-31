@@ -105,6 +105,8 @@ class MyAccessBDD extends AccessBDD {
                 return $this->updateCommandeDocument($id, $champs);
             case "commanderevue" :
                 return $this->updateCommandeRevue($id, $champs);
+            case "exemplaire" :
+                return $this->updateExemplaire($id, $champs);
             default:                    
                 return $this->updateOneTupleOneTable($table, $id, $champs);
         }   
@@ -129,6 +131,8 @@ class MyAccessBDD extends AccessBDD {
                 return $this->deleteCommandeDocument($champs);
             case "commanderevue" :
                 return $this->deleteCommandeRevue($champs);
+            case "exemplaire" :
+                return $this->deleteExemplaire($champs);
             default:
                 // cas général
                 return $this->deleteTuplesOneTable($table, $champs);
@@ -853,35 +857,35 @@ class MyAccessBDD extends AccessBDD {
     }
 
     private function deleteCommandeRevue(?array $champs) : ?int{
-        if (empty($champs) || !array_key_exists('id', $champs)) {
-            return null;
-        }
-
-        $parametres = array("id" => $champs["id"]);
-
-        $result = $this->conn->queryBDD(
-            "select count(*) as nb
-            from exemplaire
-            where idCommande = :id",
-            $parametres
-        );
-
-        if (!empty($result) && intval($result[0]["nb"]) > 0) {
-            return null;
-        }
-
-        $nb1 = $this->conn->updateBDD("delete from commanderevue where id = :id", $parametres);
-        if ($nb1 === null) {
-            return null;
-        }
-
-        $nb1 = $this->conn->updateBDD("delete from abonnement where id = :id", $parametres);
-        if ($nb2 === null) {
-            return null;
-        }
-
-        return $nb1 + $nb2;
+    if (empty($champs) || !array_key_exists('id', $champs)) {
+        return null;
     }
+
+    $parametres = array("id" => $champs["id"]);
+
+    $result = $this->conn->queryBDD(
+        "select count(*) as nb
+         from exemplaire
+         where idCommande = :id",
+        $parametres
+    );
+
+    if (!empty($result) && intval($result[0]["nb"]) > 0) {
+        return null;
+    }
+
+    $nb1 = $this->conn->updateBDD("delete from abonnement where id = :id", $parametres);
+    if ($nb1 === null) {
+        return null;
+    }
+
+    $nb2 = $this->conn->updateBDD("delete from commande where id = :id", $parametres);
+    if ($nb2 === null) {
+        return null;
+    }
+
+    return $nb1 + $nb2;
+}
 
     private function updateCommandeRevue(?string $id, ?array $champs) : ?int{
         if (is_null($id) || empty($champs)) {
@@ -921,5 +925,45 @@ class MyAccessBDD extends AccessBDD {
         $requete .= "order by cr.dateFinAbonnement asc";
 
         return $this->conn->queryBDD($requete);
+    }
+
+    private function updateExemplaire(?string $id, ?array $champs) : ?int{
+        if (is_null($id) || empty($champs)) {
+            return null;
+        }
+
+        if (!array_key_exists('numero', $champs)) {
+            return null;
+        }
+
+        $requete = "update exemplaire
+                    set dateAchat = :dateAchat,
+                        photo = :photo,
+                        idEtat = :idEtat
+                    where id = :id and numero = :numero";
+
+        $parametres = array(
+            "id" => $champs["id"],
+            "numero" => $champs["numero"],
+            "dateAchat" => $champs["dateAchat"],
+            "photo" => $champs["photo"],
+            "idEtat" => $champs["idEtat"]
+        );
+
+        return $this->conn->updateBDD($requete, $parametres);
+    }
+
+   private function deleteExemplaire(?array $champs) : ?int{
+        if (empty($champs) || !array_key_exists('id', $champs) || !array_key_exists('numero', $champs)) {
+            return null;
+        }
+
+        $parametres = array(
+            "id" => $champs["id"],
+            "numero" => $champs["numero"]
+        );
+
+        $requete = "delete from exemplaire where id = :id and numero = :numero";
+        return $this->conn->updateBDD($requete, $parametres);
     }
 }
