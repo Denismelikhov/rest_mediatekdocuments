@@ -66,6 +66,18 @@ class Controle{
             $this->reponse(400, "requete invalide");
         }        
     }
+
+    /**
+     * retourne l'utilisateur connecté
+     * @param array|null $utilisateur
+     */
+    public function reponseUtilisateurConnecte(?array $utilisateur){
+        if (!is_null($utilisateur)){
+            $this->reponse(200, "OK", $utilisateur);
+        }else{
+            $this->reponse(400, "utilisateur non trouvé");
+        }
+    }
 	
     /**
      * authentification incorrecte

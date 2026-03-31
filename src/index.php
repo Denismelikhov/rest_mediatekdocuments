@@ -25,6 +25,12 @@ if (!$url->authentification()){
     $table = $url->recupVariable("table");
     $id = $url->recupVariable("id");
     $champs = $url->recupVariable("champs", "json");
-    // demande au controleur de traiter la demande
-    $controle->demande($methodeHTTP, $table, $id, $champs);
+
+    // retour de l'utilisateur connecté
+    if ($methodeHTTP === "GET" && $table === "utilisateurconnecte"){
+        $controle->reponseUtilisateurConnecte($url->getUtilisateurConnecte());
+    }else{
+        // demande au controleur de traiter la demande
+        $controle->demande($methodeHTTP, $table, $id, $champs);
+    }
 }

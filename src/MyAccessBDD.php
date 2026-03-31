@@ -46,6 +46,10 @@ class MyAccessBDD extends AccessBDD {
                 return $this->selectCommandesRevue($champs);
             case "commanderevueexpiration" :
                 return $this->selectCommandesRevueAExpirationProche();
+            case "service" :
+                return $this->selectTableSimple($table);
+            case "utilisateur" :
+                return $this->selectUtilisateurs();
             case "genre" :
             case "public" :
             case "rayon" :
@@ -59,6 +63,18 @@ class MyAccessBDD extends AccessBDD {
                 // cas général
                 return $this->selectTuplesOneTable($table, $champs);
         }	
+    }
+
+    /**
+     * récupère tous les utilisateurs avec le libellé du service
+     * @return array|null
+     */
+    private function selectUtilisateurs() : ?array{
+        $requete = "select u.id, u.login, u.idService, s.libelle as service ";
+        $requete .= "from utilisateur u ";
+        $requete .= "join service s on s.id = u.idService ";
+        $requete .= "order by u.login ";
+        return $this->conn->queryBDD($requete);
     }
 
     /**

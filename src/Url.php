@@ -2,6 +2,7 @@
 require '../vendor/autoload.php';
 use Dotenv\Dotenv;
 
+include_once("Connexion.php");
 
 /**
  * Singleton car la récupération des données ne peut se faire qu'une fois
@@ -34,6 +35,12 @@ class Url {
      * @var string
      */
     private $methodeHTTP;
+
+    /**
+     * utilisateur authentifié
+     * @var array|null
+     */
+    private $utilisateurConnecte = null;
     
     /**
      * constructeur privé
@@ -95,25 +102,65 @@ class Url {
         $authentification = htmlspecialchars($_ENV['AUTHENTIFICATION'] ?? '');
         switch ($authentification){
             case '' : return true ;
-            case 'basic' : return self::basicAuthentification() ;
+            case 'basic' : return $this->basicAuthentification() ;
             default : return true;
         }
     }
 
     /**
+     * retourne l'utilisateur authentifié
+     * @return array|null
+     */
+    public function getUtilisateurConnecte() : ?array{
+        return $this->utilisateurConnecte;
+    }
+
+    /**
      * compare le user/pwd reçu en 'basic auth' 
-     * avec le user/pwd dans les variables d'environnement
+     * avec le user/pwd dans la table utilisateur
      * @return bool true si authentification réussie
      */
     private function basicAuthentification() : bool{
-        // récupère les variables d'environnement de l'authentification
-        $expectedUser = htmlspecialchars($_ENV['AUTH_USER'] ?? '');
-        $expectedPw = htmlspecialchars($_ENV['AUTH_PW'] ?? '');  
         // récupère les variables envoyées en 'basic auth'
         $authUser = htmlspecialchars($_SERVER['PHP_AUTH_USER'] ?? '');
-        $authPw = htmlspecialchars($_SERVER['PHP_AUTH_PW'] ?? '');    
-        // Contrôle si les valeurs d'authentification sont identiques
-        return ($authUser === $expectedUser && $authPw === $expectedPw) ;
+        $authPw = htmlspecialchars($_SERVER['PHP_AUTH_PW'] ?? '');
+
+        if ($authUser === '' || $authPw === '') {
+            return false;
+        }
+
+        try{
+            // récupération des variables d'environnement de l'accès à la BDD
+            $login = htmlspecialchars($_ENV['BDD_LOGIN'] ?? '');
+            $pwd = htmlspecialchars($_ENV['BDD_PWD'] ?? '');
+            $bd = htmlspecialchars($_ENV['BDD_BD'] ?? '');
+            $server = htmlspecialchars($_ENV['BDD_SERVER'] ?? '');
+            $port = htmlspecialchars($_ENV['BDD_PORT'] ?? '');
+
+            // création / récupération de la connexion
+            $conn = Connexion::getInstance($login, $pwd, $bd, $server, $port);
+
+            // contrôle dans la base de données
+            $requete = "select u.id, u.login, u.idService, s.libelle as service
+                        from utilisateur u
+                        join service s on s.id = u.idService
+                        where u.login = :login and u.pwd = :pwd;";
+
+            $param = array(
+                "login" => $authUser,
+                "pwd" => $authPw
+            );
+
+            $result = $conn->queryBDD($requete, $param);
+
+            if ($result !== null && count($result) === 1) {
+                $this->utilisateurConnecte = $result[0];
+                return true;
+            }
+            return false;
+        }catch(Exception $e){
+            return false;
+        }
     }    
  
     /**
