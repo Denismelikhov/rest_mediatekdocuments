@@ -60,6 +60,15 @@ Il faut donc renseigner dans Postman :
   <li><strong>Password</strong> : mot de passe API</li>
 </ul>
 
+<h1>Utilisation de l’API en ligne</h1>
+
+L’API a également été déployée en ligne afin de pouvoir être utilisée à distance par l’application C#.<br>
+Adresse de l’API en ligne :<br>
+<strong>https://rest-mediatekdocuments.alwaysdata.net/</strong><br><br>
+
+Cette version en ligne fonctionne sur le même principe que la version locale, avec une authentification basique et les mêmes routes principales.<br>
+Elle permet notamment à l’application installée sur un poste client de communiquer avec la base de données distante sans dépendre d’un serveur local.<br><br>
+
 Exemples de routes disponibles :<br>
 <ul>
   <li><strong>GET /livre</strong> : récupérer la liste des livres</li>
