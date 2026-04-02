@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Apr 01, 2026 at 08:35 PM
+-- Generation Time: Apr 02, 2026 at 03:37 PM
 -- Server version: 8.4.7
 -- PHP Version: 8.3.28
 
@@ -158,7 +158,6 @@ INSERT INTO `document` (`id`, `titre`, `image`, `idRayon`, `idPublic`, `idGenre`
 ('20003', 'Jurassic Park', '', 'DF001', '00003', '10002'),
 ('20004', 'Matrix', '', 'DF001', '00003', '10002'),
 ('DVDTEST100', 'DVD test', 'dvd.jpg', 'DF001', '00003', '10002'),
-('DVDTEST999', 'DVD test', 'dvd.jpg', 'DF001', '00003', '10002'),
 ('LIVRETEST2', 'Livre test', 'test.jpg', 'LV002', '00002', '10006'),
 ('LIVRETEST3', 'Livre test', 'test.jpg', 'LV002', '00002', '10006'),
 ('LIVRETEST4', 'Livre test', 'test.jpg', 'LV002', '00002', '10006'),
@@ -188,8 +187,7 @@ INSERT INTO `dvd` (`id`, `synopsis`, `realisateur`, `duree`) VALUES
 ('20002', 'L\'anneau unique, forgé par Sauron, est porté par Fraudon qui l\'amène à Foncombe. De là, des représentants de peuples différents vont s\'unir pour aider Fraudon à amener l\'anneau à la montagne du Destin.', 'Peter Jackson', 228),
 ('20003', 'Un milliardaire et des généticiens créent des dinosaures à partir de clonage.', 'Steven Spielberg', 128),
 ('20004', 'Un informaticien réalise que le monde dans lequel il vit est une simulation gérée par des machines.', 'Les Wachowski', 136),
-('DVDTEST100', 'Synopsis test', 'Réalisateur test', 120),
-('DVDTEST999', 'Synopsis test', 'Réalisateur test', 120);
+('DVDTEST100', 'Synopsis test', 'Réalisateur test', 120);
 
 -- --------------------------------------------------------
 
@@ -383,7 +381,6 @@ INSERT INTO `livres_dvd` (`id`) VALUES
 ('20003'),
 ('20004'),
 ('DVDTEST100'),
-('DVDTEST999'),
 ('LIVRETEST2'),
 ('LIVRETEST3'),
 ('LIVRETEST4');
