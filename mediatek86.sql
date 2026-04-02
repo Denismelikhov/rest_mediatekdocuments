@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.0.2
+-- version 5.2.3
 -- https://www.phpmyadmin.net/
 --
--- Hôte : 127.0.0.1:3306
--- Généré le : lun. 17 oct. 2022 à 12:26
--- Version du serveur :  5.7.31
--- Version de PHP : 7.4.9
+-- Host: 127.0.0.1:3306
+-- Generation Time: Apr 01, 2026 at 08:35 PM
+-- Server version: 8.4.7
+-- PHP Version: 8.3.28
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,65 +18,106 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Base de données : mediatek86
+-- Database: `mediatek86`
 --
 
 -- --------------------------------------------------------
 
 --
--- Structure de la table abonnement
+-- Table structure for table `abonnement`
 --
 
-CREATE TABLE abonnement (
-  id varchar(5) NOT NULL,
-  dateFinAbonnement date DEFAULT NULL,
-  idRevue varchar(10) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+DROP TABLE IF EXISTS `abonnement`;
+CREATE TABLE IF NOT EXISTS `abonnement` (
+  `id` varchar(5) NOT NULL,
+  `dateFinAbonnement` date DEFAULT NULL,
+  `idRevue` varchar(10) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idRevue` (`idRevue`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `abonnement`
+--
+
+INSERT INTO `abonnement` (`id`, `dateFinAbonnement`, `idRevue`) VALUES
+('00003', '2026-06-30', '10002'),
+('00004', '2026-12-31', '10002');
 
 -- --------------------------------------------------------
 
 --
--- Structure de la table commande
+-- Table structure for table `commande`
 --
 
-CREATE TABLE commande (
-  id varchar(5) NOT NULL,
-  dateCommande date DEFAULT NULL,
-  montant double DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+DROP TABLE IF EXISTS `commande`;
+CREATE TABLE IF NOT EXISTS `commande` (
+  `id` varchar(5) NOT NULL,
+  `dateCommande` date DEFAULT NULL,
+  `montant` double DEFAULT NULL,
+  `idSuivi` varchar(5) NOT NULL DEFAULT '00001',
+  PRIMARY KEY (`id`),
+  KEY `commande_ibfk_suivi` (`idSuivi`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `commande`
+--
+
+INSERT INTO `commande` (`id`, `dateCommande`, `montant`, `idSuivi`) VALUES
+('00001', '2026-03-30', 25, '00003'),
+('00002', '2026-03-30', 35, '00001'),
+('00003', '2026-03-31', 15, '00001'),
+('00004', '2026-03-31', 9.99, '00001');
 
 -- --------------------------------------------------------
 
 --
--- Structure de la table commandedocument
+-- Table structure for table `commandedocument`
 --
 
-CREATE TABLE commandedocument (
-  id varchar(5) NOT NULL,
-  nbExemplaire int(11) DEFAULT NULL,
-  idLivreDvd varchar(10) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+DROP TABLE IF EXISTS `commandedocument`;
+CREATE TABLE IF NOT EXISTS `commandedocument` (
+  `id` varchar(5) NOT NULL,
+  `nbExemplaire` int DEFAULT NULL,
+  `idLivreDvd` varchar(10) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idLivreDvd` (`idLivreDvd`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `commandedocument`
+--
+
+INSERT INTO `commandedocument` (`id`, `nbExemplaire`, `idLivreDvd`) VALUES
+('00001', 1, '00003'),
+('00002', 1, '20003');
 
 -- --------------------------------------------------------
 
 --
--- Structure de la table document
+-- Table structure for table `document`
 --
 
-CREATE TABLE document (
-  id varchar(10) NOT NULL,
-  titre varchar(60) DEFAULT NULL,
-  image varchar(500) DEFAULT NULL,
-  idRayon varchar(5) NOT NULL,
-  idPublic varchar(5) NOT NULL,
-  idGenre varchar(5) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+DROP TABLE IF EXISTS `document`;
+CREATE TABLE IF NOT EXISTS `document` (
+  `id` varchar(10) NOT NULL,
+  `titre` varchar(60) DEFAULT NULL,
+  `image` varchar(500) DEFAULT NULL,
+  `idRayon` varchar(5) NOT NULL,
+  `idPublic` varchar(5) NOT NULL,
+  `idGenre` varchar(5) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idRayon` (`idRayon`),
+  KEY `idPublic` (`idPublic`),
+  KEY `idGenre` (`idGenre`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Déchargement des données de la table document
+-- Dumping data for table `document`
 --
 
-INSERT INTO document (id, titre, image, idRayon, idPublic, idGenre) VALUES
+INSERT INTO `document` (`id`, `titre`, `image`, `idRayon`, `idPublic`, `idGenre`) VALUES
 ('00001', 'Quand sort la recluse', '', 'LV003', '00002', '10014'),
 ('00002', 'Un pays à l\'aube', '', 'LV001', '00002', '10004'),
 ('00003', 'Et je danse aussi', '', 'LV002', '00003', '10013'),
@@ -93,7 +134,6 @@ INSERT INTO document (id, titre, image, idRayon, idPublic, idGenre) VALUES
 ('00014', 'Mauvaise étoile', '', 'LV003', '00003', '10014'),
 ('00015', 'La confrérie des téméraires', '', 'JN002', '00004', '10014'),
 ('00016', 'Le butin du requin', '', 'JN002', '00004', '10014'),
-('00017', 'Catastrophes au Brésil', '', 'JN002', '00004', '10014'),
 ('00018', 'Le Routard - Maroc', '', 'DV005', '00003', '10011'),
 ('00019', 'Guide Vert - Iles Canaries', '', 'DV005', '00003', '10011'),
 ('00020', 'Guide Vert - Irlande', '', 'DV005', '00003', '10011'),
@@ -101,7 +141,6 @@ INSERT INTO document (id, titre, image, idRayon, idPublic, idGenre) VALUES
 ('00022', 'Une part de Ciel', '', 'LV002', '00002', '10006'),
 ('00023', 'Le secret du janissaire', '', 'BD001', '00002', '10001'),
 ('00024', 'Pavillon noir', '', 'BD001', '00002', '10001'),
-('00025', 'L\'archipel du danger', '', 'BD001', '00002', '10001'),
 ('00026', 'La planète des singes', '', 'LV002', '00003', '10002'),
 ('10001', 'Arts Magazine', '', 'PR002', '00002', '10016'),
 ('10002', 'Alternatives Economiques', '', 'PR002', '00002', '10015'),
@@ -117,47 +156,59 @@ INSERT INTO document (id, titre, image, idRayon, idPublic, idGenre) VALUES
 ('20001', 'Star Wars 5 L\'empire contre attaque', '', 'DF001', '00003', '10002'),
 ('20002', 'Le seigneur des anneaux : la communauté de l\'anneau', '', 'DF001', '00003', '10019'),
 ('20003', 'Jurassic Park', '', 'DF001', '00003', '10002'),
-('20004', 'Matrix', '', 'DF001', '00003', '10002');
+('20004', 'Matrix', '', 'DF001', '00003', '10002'),
+('DVDTEST100', 'DVD test', 'dvd.jpg', 'DF001', '00003', '10002'),
+('DVDTEST999', 'DVD test', 'dvd.jpg', 'DF001', '00003', '10002'),
+('LIVRETEST2', 'Livre test', 'test.jpg', 'LV002', '00002', '10006'),
+('LIVRETEST3', 'Livre test', 'test.jpg', 'LV002', '00002', '10006'),
+('LIVRETEST4', 'Livre test', 'test.jpg', 'LV002', '00002', '10006'),
+('REVUETEST9', 'Revue test', 'revue.jpg', 'LV002', '00002', '10006');
 
 -- --------------------------------------------------------
 
 --
--- Structure de la table dvd
+-- Table structure for table `dvd`
 --
 
-CREATE TABLE dvd (
-  id varchar(10) NOT NULL,
-  synopsis text,
-  realisateur varchar(20) DEFAULT NULL,
-  duree int(6) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+DROP TABLE IF EXISTS `dvd`;
+CREATE TABLE IF NOT EXISTS `dvd` (
+  `id` varchar(10) NOT NULL,
+  `synopsis` text,
+  `realisateur` varchar(20) DEFAULT NULL,
+  `duree` int DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Déchargement des données de la table dvd
+-- Dumping data for table `dvd`
 --
 
-INSERT INTO dvd (id, synopsis, realisateur, duree) VALUES
+INSERT INTO `dvd` (`id`, `synopsis`, `realisateur`, `duree`) VALUES
 ('20001', 'Luc est entraîné par Yoda pendant que Han et Leia tentent de se cacher dans la cité des nuages.', 'George Lucas', 124),
 ('20002', 'L\'anneau unique, forgé par Sauron, est porté par Fraudon qui l\'amène à Foncombe. De là, des représentants de peuples différents vont s\'unir pour aider Fraudon à amener l\'anneau à la montagne du Destin.', 'Peter Jackson', 228),
 ('20003', 'Un milliardaire et des généticiens créent des dinosaures à partir de clonage.', 'Steven Spielberg', 128),
-('20004', 'Un informaticien réalise que le monde dans lequel il vit est une simulation gérée par des machines.', 'Les Wachowski', 136);
+('20004', 'Un informaticien réalise que le monde dans lequel il vit est une simulation gérée par des machines.', 'Les Wachowski', 136),
+('DVDTEST100', 'Synopsis test', 'Réalisateur test', 120),
+('DVDTEST999', 'Synopsis test', 'Réalisateur test', 120);
 
 -- --------------------------------------------------------
 
 --
--- Structure de la table etat
+-- Table structure for table `etat`
 --
 
-CREATE TABLE etat (
-  id char(5) NOT NULL,
-  libelle varchar(20) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+DROP TABLE IF EXISTS `etat`;
+CREATE TABLE IF NOT EXISTS `etat` (
+  `id` char(5) NOT NULL,
+  `libelle` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Déchargement des données de la table etat
+-- Dumping data for table `etat`
 --
 
-INSERT INTO etat (id, libelle) VALUES
+INSERT INTO `etat` (`id`, `libelle`) VALUES
 ('00001', 'neuf'),
 ('00002', 'usagé'),
 ('00003', 'détérioré'),
@@ -166,27 +217,29 @@ INSERT INTO etat (id, libelle) VALUES
 -- --------------------------------------------------------
 
 --
--- Structure de la table exemplaire
+-- Table structure for table `exemplaire`
 --
 
-CREATE TABLE exemplaire (
-  id varchar(10) NOT NULL,
-  numero int(11) NOT NULL,
-  dateAchat date DEFAULT NULL,
-  photo varchar(500) NOT NULL,
-  idEtat char(5) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+DROP TABLE IF EXISTS `exemplaire`;
+CREATE TABLE IF NOT EXISTS `exemplaire` (
+  `id` varchar(10) NOT NULL,
+  `numero` int NOT NULL,
+  `dateAchat` date DEFAULT NULL,
+  `photo` varchar(500) NOT NULL,
+  `idEtat` char(5) NOT NULL,
+  PRIMARY KEY (`id`,`numero`),
+  KEY `idEtat` (`idEtat`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Déchargement des données de la table exemplaire
+-- Dumping data for table `exemplaire`
 --
 
-INSERT INTO exemplaire (id, numero, dateAchat, photo, idEtat) VALUES
-('10002', 418, '2021-12-01', '', '00001'),
+INSERT INTO `exemplaire` (`id`, `numero`, `dateAchat`, `photo`, `idEtat`) VALUES
+('00003', 1, '2026-03-30', '', '00001'),
+('00003', 2, '2026-03-30', '', '00001'),
 ('10007', 3237, '2021-11-23', '', '00001'),
 ('10007', 3238, '2021-11-30', '', '00001'),
-('10007', 3239, '2021-12-07', '', '00001'),
-('10007', 3240, '2021-12-21', '', '00001'),
 ('10011', 505, '2022-10-16', '', '00001'),
 ('10011', 506, '2021-04-01', '', '00001'),
 ('10011', 507, '2021-05-03', '', '00001'),
@@ -201,19 +254,21 @@ INSERT INTO exemplaire (id, numero, dateAchat, photo, idEtat) VALUES
 -- --------------------------------------------------------
 
 --
--- Structure de la table genre
+-- Table structure for table `genre`
 --
 
-CREATE TABLE genre (
-  id varchar(5) NOT NULL,
-  libelle varchar(20) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+DROP TABLE IF EXISTS `genre`;
+CREATE TABLE IF NOT EXISTS `genre` (
+  `id` varchar(5) NOT NULL,
+  `libelle` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Déchargement des données de la table genre
+-- Dumping data for table `genre`
 --
 
-INSERT INTO genre (id, libelle) VALUES
+INSERT INTO `genre` (`id`, `libelle`) VALUES
 ('10000', 'Humour'),
 ('10001', 'Bande dessinée'),
 ('10002', 'Science Fiction'),
@@ -237,21 +292,23 @@ INSERT INTO genre (id, libelle) VALUES
 -- --------------------------------------------------------
 
 --
--- Structure de la table livre
+-- Table structure for table `livre`
 --
 
-CREATE TABLE livre (
-  id varchar(10) NOT NULL,
-  ISBN varchar(13) DEFAULT NULL,
-  auteur varchar(20) DEFAULT NULL,
-  collection varchar(50) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+DROP TABLE IF EXISTS `livre`;
+CREATE TABLE IF NOT EXISTS `livre` (
+  `id` varchar(10) NOT NULL,
+  `ISBN` varchar(13) DEFAULT NULL,
+  `auteur` varchar(20) DEFAULT NULL,
+  `collection` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Déchargement des données de la table livre
+-- Dumping data for table `livre`
 --
 
-INSERT INTO livre (id, ISBN, auteur, collection) VALUES
+INSERT INTO `livre` (`id`, `ISBN`, `auteur`, `collection`) VALUES
 ('00001', '1234569877896', 'Fred Vargas', 'Commissaire Adamsberg'),
 ('00002', '1236547896541', 'Dennis Lehanne', ''),
 ('00003', '6541236987410', 'Anne-Laure Bondoux', ''),
@@ -268,7 +325,6 @@ INSERT INTO livre (id, ISBN, auteur, collection) VALUES
 ('00014', '', 'RJ Ellory', ''),
 ('00015', '', 'Floriane Turmeau', ''),
 ('00016', '', 'Julian Press', ''),
-('00017', '', 'Philippe Masson', ''),
 ('00018', '', '', 'Guide du Routard'),
 ('00019', '', '', 'Guide Vert'),
 ('00020', '', '', 'Guide Vert'),
@@ -276,24 +332,28 @@ INSERT INTO livre (id, ISBN, auteur, collection) VALUES
 ('00022', '', 'Claudie Gallay', ''),
 ('00023', '', 'Ayrolles - Masbou', 'De cape et de crocs'),
 ('00024', '', 'Ayrolles - Masbou', 'De cape et de crocs'),
-('00025', '', 'Ayrolles - Masbou', 'De cape et de crocs'),
-('00026', '', 'Pierre Boulle', 'Julliard');
+('00026', '', 'Pierre Boulle', 'Julliard'),
+('LIVRETEST2', '9780000000001', 'Auteur test', 'Collection test'),
+('LIVRETEST3', '9780000000001', 'Auteur test', 'Collection test'),
+('LIVRETEST4', '9780000000001', 'Auteur test', 'Collection test');
 
 -- --------------------------------------------------------
 
 --
--- Structure de la table livres_dvd
+-- Table structure for table `livres_dvd`
 --
 
-CREATE TABLE livres_dvd (
-  id varchar(10) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+DROP TABLE IF EXISTS `livres_dvd`;
+CREATE TABLE IF NOT EXISTS `livres_dvd` (
+  `id` varchar(10) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Déchargement des données de la table livres_dvd
+-- Dumping data for table `livres_dvd`
 --
 
-INSERT INTO livres_dvd (id) VALUES
+INSERT INTO `livres_dvd` (`id`) VALUES
 ('00001'),
 ('00002'),
 ('00003'),
@@ -310,7 +370,6 @@ INSERT INTO livres_dvd (id) VALUES
 ('00014'),
 ('00015'),
 ('00016'),
-('00017'),
 ('00018'),
 ('00019'),
 ('00020'),
@@ -318,29 +377,35 @@ INSERT INTO livres_dvd (id) VALUES
 ('00022'),
 ('00023'),
 ('00024'),
-('00025'),
 ('00026'),
 ('20001'),
 ('20002'),
 ('20003'),
-('20004');
+('20004'),
+('DVDTEST100'),
+('DVDTEST999'),
+('LIVRETEST2'),
+('LIVRETEST3'),
+('LIVRETEST4');
 
 -- --------------------------------------------------------
 
 --
--- Structure de la table public
+-- Table structure for table `public`
 --
 
-CREATE TABLE public (
-  id varchar(5) NOT NULL,
-  libelle varchar(50) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+DROP TABLE IF EXISTS `public`;
+CREATE TABLE IF NOT EXISTS `public` (
+  `id` varchar(5) NOT NULL,
+  `libelle` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Déchargement des données de la table public
+-- Dumping data for table `public`
 --
 
-INSERT INTO public (id, libelle) VALUES
+INSERT INTO `public` (`id`, `libelle`) VALUES
 ('00001', 'Jeunesse'),
 ('00002', 'Adultes'),
 ('00003', 'Tous publics'),
@@ -349,19 +414,21 @@ INSERT INTO public (id, libelle) VALUES
 -- --------------------------------------------------------
 
 --
--- Structure de la table rayon
+-- Table structure for table `rayon`
 --
 
-CREATE TABLE rayon (
-  id char(5) NOT NULL,
-  libelle varchar(30) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+DROP TABLE IF EXISTS `rayon`;
+CREATE TABLE IF NOT EXISTS `rayon` (
+  `id` char(5) NOT NULL,
+  `libelle` varchar(30) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Déchargement des données de la table rayon
+-- Dumping data for table `rayon`
 --
 
-INSERT INTO rayon (id, libelle) VALUES
+INSERT INTO `rayon` (`id`, `libelle`) VALUES
 ('BD001', 'BD Adultes'),
 ('BL001', 'Beaux Livres'),
 ('DF001', 'DVD films'),
@@ -381,20 +448,22 @@ INSERT INTO rayon (id, libelle) VALUES
 -- --------------------------------------------------------
 
 --
--- Structure de la table revue
+-- Table structure for table `revue`
 --
 
-CREATE TABLE revue (
-  id varchar(10) NOT NULL,
-  periodicite varchar(2) DEFAULT NULL,
-  delaiMiseADispo int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+DROP TABLE IF EXISTS `revue`;
+CREATE TABLE IF NOT EXISTS `revue` (
+  `id` varchar(10) NOT NULL,
+  `periodicite` varchar(2) DEFAULT NULL,
+  `delaiMiseADispo` int DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Déchargement des données de la table revue
+-- Dumping data for table `revue`
 --
 
-INSERT INTO revue (id, periodicite, delaiMiseADispo) VALUES
+INSERT INTO `revue` (`id`, `periodicite`, `delaiMiseADispo`) VALUES
 ('10001', 'MS', 52),
 ('10002', 'MS', 52),
 ('10003', 'HB', 15),
@@ -405,152 +474,145 @@ INSERT INTO revue (id, periodicite, delaiMiseADispo) VALUES
 ('10008', 'HB', 26),
 ('10009', 'QT', 5),
 ('10010', 'HB', 12),
-('10011', 'MS', 52);
+('10011', 'MS', 52),
+('REVUETEST9', 'Me', 30);
+
+-- --------------------------------------------------------
 
 --
--- Index pour les tables déchargées
+-- Table structure for table `service`
 --
 
---
--- Index pour la table abonnement
---
-ALTER TABLE abonnement
-  ADD PRIMARY KEY (id),
-  ADD KEY idRevue (idRevue);
+DROP TABLE IF EXISTS `service`;
+CREATE TABLE IF NOT EXISTS `service` (
+  `id` int NOT NULL,
+  `libelle` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `libelle` (`libelle`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Index pour la table commande
+-- Dumping data for table `service`
 --
-ALTER TABLE commande
-  ADD PRIMARY KEY (id);
+
+INSERT INTO `service` (`id`, `libelle`) VALUES
+(1, 'Administratif'),
+(2, 'Prêts'),
+(3, 'Culture'),
+(4, 'Administrateur');
+
+-- --------------------------------------------------------
 
 --
--- Index pour la table commandedocument
+-- Table structure for table `suivi`
 --
-ALTER TABLE commandedocument
-  ADD PRIMARY KEY (id),
-  ADD KEY idLivreDvd (idLivreDvd);
+
+DROP TABLE IF EXISTS `suivi`;
+CREATE TABLE IF NOT EXISTS `suivi` (
+  `id` varchar(5) NOT NULL,
+  `libelle` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Index pour la table document
+-- Dumping data for table `suivi`
 --
-ALTER TABLE document
-  ADD PRIMARY KEY (id),
-  ADD KEY idRayon (idRayon),
-  ADD KEY idPublic (idPublic),
-  ADD KEY idGenre (idGenre);
+
+INSERT INTO `suivi` (`id`, `libelle`) VALUES
+('00001', 'en cours'),
+('00002', 'relancee'),
+('00003', 'livree'),
+('00004', 'reglee');
+
+-- --------------------------------------------------------
 
 --
--- Index pour la table dvd
+-- Table structure for table `utilisateur`
 --
-ALTER TABLE dvd
-  ADD PRIMARY KEY (id);
+
+DROP TABLE IF EXISTS `utilisateur`;
+CREATE TABLE IF NOT EXISTS `utilisateur` (
+  `id` int NOT NULL,
+  `login` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `pwd` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `idService` int NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `login` (`login`),
+  KEY `idService` (`idService`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Index pour la table etat
+-- Dumping data for table `utilisateur`
 --
-ALTER TABLE etat
-  ADD PRIMARY KEY (id);
+
+INSERT INTO `utilisateur` (`id`, `login`, `pwd`, `idService`) VALUES
+(1, 'gestionAdmin', 'admin', 1),
+(2, 'prets', 'prets', 2),
+(3, 'culture', 'culture', 3),
+(4, 'admin', 'admin', 4);
 
 --
--- Index pour la table exemplaire
---
-ALTER TABLE exemplaire
-  ADD PRIMARY KEY (id,numero),
-  ADD KEY idEtat (idEtat);
-
---
--- Index pour la table genre
---
-ALTER TABLE genre
-  ADD PRIMARY KEY (id);
-
---
--- Index pour la table livre
---
-ALTER TABLE livre
-  ADD PRIMARY KEY (id);
-
---
--- Index pour la table livres_dvd
---
-ALTER TABLE livres_dvd
-  ADD PRIMARY KEY (id);
-
---
--- Index pour la table public
---
-ALTER TABLE public
-  ADD PRIMARY KEY (id);
-
---
--- Index pour la table rayon
---
-ALTER TABLE rayon
-  ADD PRIMARY KEY (id);
-
---
--- Index pour la table revue
---
-ALTER TABLE revue
-  ADD PRIMARY KEY (id);
-
---
--- Contraintes pour les tables déchargées
+-- Constraints for dumped tables
 --
 
 --
--- Contraintes pour la table abonnement
+-- Constraints for table `abonnement`
 --
-ALTER TABLE abonnement
-  ADD CONSTRAINT abonnement_ibfk_1 FOREIGN KEY (id) REFERENCES commande (id),
-  ADD CONSTRAINT abonnement_ibfk_2 FOREIGN KEY (idRevue) REFERENCES revue (id);
+ALTER TABLE `abonnement`
+  ADD CONSTRAINT `abonnement_ibfk_1` FOREIGN KEY (`id`) REFERENCES `commande` (`id`),
+  ADD CONSTRAINT `abonnement_ibfk_2` FOREIGN KEY (`idRevue`) REFERENCES `revue` (`id`);
 
 --
--- Contraintes pour la table commandedocument
+-- Constraints for table `commande`
 --
-ALTER TABLE commandedocument
-  ADD CONSTRAINT commandedocument_ibfk_1 FOREIGN KEY (id) REFERENCES commande (id),
-  ADD CONSTRAINT commandedocument_ibfk_2 FOREIGN KEY (idLivreDvd) REFERENCES livres_dvd (id);
+ALTER TABLE `commande`
+  ADD CONSTRAINT `commande_ibfk_suivi` FOREIGN KEY (`idSuivi`) REFERENCES `suivi` (`id`);
 
 --
--- Contraintes pour la table document
+-- Constraints for table `commandedocument`
 --
-ALTER TABLE document
-  ADD CONSTRAINT document_ibfk_1 FOREIGN KEY (idRayon) REFERENCES rayon (id),
-  ADD CONSTRAINT document_ibfk_2 FOREIGN KEY (idPublic) REFERENCES public (id),
-  ADD CONSTRAINT document_ibfk_3 FOREIGN KEY (idGenre) REFERENCES genre (id);
+ALTER TABLE `commandedocument`
+  ADD CONSTRAINT `commandedocument_ibfk_1` FOREIGN KEY (`id`) REFERENCES `commande` (`id`),
+  ADD CONSTRAINT `commandedocument_ibfk_2` FOREIGN KEY (`idLivreDvd`) REFERENCES `livres_dvd` (`id`);
 
 --
--- Contraintes pour la table dvd
+-- Constraints for table `document`
 --
-ALTER TABLE dvd
-  ADD CONSTRAINT dvd_ibfk_1 FOREIGN KEY (id) REFERENCES livres_dvd (id);
+ALTER TABLE `document`
+  ADD CONSTRAINT `document_ibfk_1` FOREIGN KEY (`idRayon`) REFERENCES `rayon` (`id`),
+  ADD CONSTRAINT `document_ibfk_2` FOREIGN KEY (`idPublic`) REFERENCES `public` (`id`),
+  ADD CONSTRAINT `document_ibfk_3` FOREIGN KEY (`idGenre`) REFERENCES `genre` (`id`);
 
 --
--- Contraintes pour la table exemplaire
+-- Constraints for table `dvd`
 --
-ALTER TABLE exemplaire
-  ADD CONSTRAINT exemplaire_ibfk_1 FOREIGN KEY (id) REFERENCES document (id),
-  ADD CONSTRAINT exemplaire_ibfk_2 FOREIGN KEY (idEtat) REFERENCES etat (id);
+ALTER TABLE `dvd`
+  ADD CONSTRAINT `dvd_ibfk_1` FOREIGN KEY (`id`) REFERENCES `livres_dvd` (`id`);
 
 --
--- Contraintes pour la table livre
+-- Constraints for table `exemplaire`
 --
-ALTER TABLE livre
-  ADD CONSTRAINT livre_ibfk_1 FOREIGN KEY (id) REFERENCES livres_dvd (id);
+ALTER TABLE `exemplaire`
+  ADD CONSTRAINT `exemplaire_ibfk_1` FOREIGN KEY (`id`) REFERENCES `document` (`id`),
+  ADD CONSTRAINT `exemplaire_ibfk_2` FOREIGN KEY (`idEtat`) REFERENCES `etat` (`id`);
 
 --
--- Contraintes pour la table livres_dvd
+-- Constraints for table `livre`
 --
-ALTER TABLE livres_dvd
-  ADD CONSTRAINT livres_dvd_ibfk_1 FOREIGN KEY (id) REFERENCES document (id);
+ALTER TABLE `livre`
+  ADD CONSTRAINT `livre_ibfk_1` FOREIGN KEY (`id`) REFERENCES `livres_dvd` (`id`);
 
 --
--- Contraintes pour la table revue
+-- Constraints for table `livres_dvd`
 --
-ALTER TABLE revue
-  ADD CONSTRAINT revue_ibfk_1 FOREIGN KEY (id) REFERENCES document (id);
+ALTER TABLE `livres_dvd`
+  ADD CONSTRAINT `livres_dvd_ibfk_1` FOREIGN KEY (`id`) REFERENCES `document` (`id`);
+
+--
+-- Constraints for table `revue`
+--
+ALTER TABLE `revue`
+  ADD CONSTRAINT `revue_ibfk_1` FOREIGN KEY (`id`) REFERENCES `document` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
